@@ -92,7 +92,7 @@ atlassian-ide-plugin.xml
 /.rakeTasks
 
 # aws-sam
-.asw-sam
+.aws-sam/
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
