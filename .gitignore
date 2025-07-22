@@ -94,6 +94,10 @@ atlassian-ide-plugin.xml
 # aws-sam
 .aws-sam/
 
+# Local
+events/
+tests/
+
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 crashlytics.properties
