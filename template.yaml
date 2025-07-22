@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-rag-vector-search
+
+  Sample SAM Template for sam-rag-vector-search
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    Description: API Key for OpenAI Service
+    NoEcho: true
+  ChromaDBHost:
+    Type: String
+    Description: host address of the ChromaDB server
+  ChromaDBPort:
+    Type: String
+    Description: port number of the ChormaDB server
+
+Resources:
+  MLLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ml-dependencies
+      Description: Layer for ML dependencies
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - python3.9
+      RetentionPolicy: Retain
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello_world/ # hello_world 디렉토리 전체가 패키징된다.
+      Handler: app.lambda_handler 
+      Runtime: python3.9 # 파이썬 버전에 맞게 조정 가능
+      Architectures:
+      - x86_64
+      Layers:
+        - !Ref MLLayer
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /user_query
+            Method: post
+      Environment:
+        Variables:
+          OPENAI_KEY: !Ref OpenAIApiKey # 위 Parameters 섹션에서 정의한 값을 참조한다. -> !Ref로
+          CHROMADB_HOST: !Ref ChromaDBHost # 이 방식은 배포할 때 파라미터로 입력해서 사용하기에 깃헙에 올려도 문제가 없다.
+          CHROMADB_PORT: !Ref ChromaDBPort # 배포할 때 파라미터로 지정해놓은 이름=값 이렇게 지정하면 된다.
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World 
+      function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: Hello World Lambda Function ARN
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value: !GetAtt HelloWorldFunctionRole.Arn

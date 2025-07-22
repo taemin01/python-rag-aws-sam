@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+langchain-community = "*"
+pypdf = "*"
+langchain = "*"
+langchain-huggingface = "*"
+chromadb = "0.6.3"
+openai = "1.9.0"
+httpx = ">=0.27.0"
+ipykernel = "*"
+unstructured = "*"
+unstructured-inference = "*"
+sentence-transformers = "*"
+unstructured_pytesseract = "*" # <--- 이 줄을 추가합니다.
+pi-heif = "*"
+pdf2image = "*"
+pytesseract = "*"
+pymupdf = "*"
+urllib3 = "<2.0.0"
+
+[dev-packages]
+ipykernel = "*"
+
+[requires]
+python_version = "3.9"
