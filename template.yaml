@@ -9,8 +9,8 @@ Description: >
 Globals:
   Function:
     Timeout: 60
-
     Tracing: Active
+    MemorySize: 1024
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
@@ -35,17 +35,17 @@ Resources:
     Properties:
       LayerName: ml-dependencies
       Description: Layer for ML dependencies
-      ContentUri: layer/
+      ContentUri: layer/python/
       CompatibleRuntimes:
-        - python3.9
+        - python3.10
       RetentionPolicy: Retain
 
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello_world/ # hello_world 디렉토리 전체가 패키징된다.
+      CodeUri: hello_world/
       Handler: app.lambda_handler 
-      Runtime: python3.9 # 파이썬 버전에 맞게 조정 가능
+      Runtime: python3.10 # 파이썬 버전에 맞게 조정 가능
       Architectures:
       - x86_64
       Layers:
@@ -82,7 +82,7 @@ Outputs:
   HelloWorldApi:
     Description: API Gateway endpoint URL for Prod stage for Hello World 
       function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/user_query"
   HelloWorldFunction:
     Description: Hello World Lambda Function ARN
     Value: !GetAtt HelloWorldFunction.Arn

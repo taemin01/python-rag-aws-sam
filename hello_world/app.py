@@ -1,23 +1,30 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import json
-import requests
 import os
 import chromadb
-import httpx
+import requests
 from chromadb.config import Settings
 import numpy as np
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 embeddings_model = HuggingFaceEmbeddings(
-            model_name='sentence-transformers/all-MiniLM-L6-v2',
-            model_kwargs={'device':'cpu'},
-            encode_kwargs={'normalize_embeddings':True},
-        )
+    model_name='sentence-transformers/all-MiniLM-L6-v2',
+    model_kwargs={'device':'cpu'},
+    encode_kwargs={'normalize_embeddings': True},
+)
 
 client = chromadb.HttpClient(
-            host=os.getenv('CHROMADB_HOST'),
-            port=os.getenv('CHROMADB_PORT'),
-            settings=Settings(anonymized_telemetry=False)
-        )
+    host=os.getenv('CHROMADB_HOST'),
+    port=os.getenv('CHROMADB_PORT'),
+    ssl=False,
+    settings=Settings(
+        anonymized_telemetry=False,
+        allow_reset=True
+    )
+)
 OPENAI_API_KEY = os.getenv('OPENAI_KEY')
 
 def lambda_handler(event, context):
@@ -32,12 +39,13 @@ def lambda_handler(event, context):
         }
     
     collection_name = f'document_{request_collection_name}' # 중괄호 안에 입력받은 파일 A~H까지 입력 받게끔 해야함 POST로
+    collection = client.get_or_create_collection(name=collection_name)
     print(f"ChromaDB 컬렉션 이름: {collection_name}")
     print(f"사용자 질문 : {request_user_query}\n")
 
-    user_query_embedding = embeddings_model.embed_qurey(request_user_query)
+    user_query_embedding = embeddings_model.embed_query(request_user_query)
 
-    results = collection_name.query(
+    results = collection.query(
         query_embeddings=[user_query_embedding],
         n_result=10,
         include=['documents', 'metadatas']
@@ -93,9 +101,13 @@ def lambda_handler(event, context):
         "Content-Type": "application/json"
     }
 
-    # timeout -> context가 길어 5초로는 부족, 60초로 늘려줌
-    with httpx.Client(timeout=60.0) as client:
-        response = client.post(base_url, headers=headers, json=payload)
+    # timeout을 60초로 설정
+    response = requests.post(
+        base_url,
+        headers=headers,
+        json=payload,
+        timeout=60
+    )
     
     result = response.json()
     llm_result = result['choices'][0]['message']['content']

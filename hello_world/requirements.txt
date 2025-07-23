@@ -1,6 +1,2 @@
-chromadb==0.6.3 
-httpx==0.28.1   
-numpy==2.0.2    
-
-langchain-community==0.3.27 
-sentence-transformers==5.0.0 
+requests==2.31.0
+python-dotenv==1.0.0

@@ -4,26 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-langchain-community = "*"
-pypdf = "*"
-langchain = "*"
-langchain-huggingface = "*"
-chromadb = "0.6.3"
-openai = "1.9.0"
-httpx = ">=0.27.0"
-ipykernel = "*"
-unstructured = "*"
-unstructured-inference = "*"
-sentence-transformers = "*"
-unstructured_pytesseract = "*" # <--- 이 줄을 추가합니다.
-pi-heif = "*"
-pdf2image = "*"
-pytesseract = "*"
-pymupdf = "*"
-urllib3 = "<2.0.0"
+chromadb = "==0.4.18"  # ChromaDB 클라이언트
+httpx = "==0.28.1"  # OpenAI API 호출
+langchain-community = "==0.3.27"  # HuggingFaceEmbeddings
+sentence-transformers = "==5.0.0"  # 임베딩 모델
+python-dotenv = "==1.0.0"  # .env 환경변수 로드용 (로컬 개발 시)
 
 [dev-packages]
 ipykernel = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
